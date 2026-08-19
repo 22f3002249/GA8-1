@@ -4,67 +4,22 @@ import json
 import math
 import re
 import unicodedata
-from collections import deque
 from datetime import datetime, timezone, timedelta
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
 
 app = FastAPI()
-_DEBUG_LOGS = deque(maxlen=500)
-_DEBUG_SEQUENCE = 0
 
-
-@app.middleware("http")
-async def capture_debug_log(request: Request, call_next):
-    global _DEBUG_SEQUENCE
-    if request.url.path in ("/ga8/debug-logs", "/ga8/debug-logs/clear"):
-        return await call_next(request)
-    body = await request.body()
-    sent = False
-
-    async def receive():
-        nonlocal sent
-        if sent:
-            return {"type": "http.request", "body": b"", "more_body": False}
-        sent = True
-        return {"type": "http.request", "body": body, "more_body": False}
-
-    request._receive = receive
-    response = await call_next(request)
-    response_body = b"".join([chunk async for chunk in response.body_iterator])
-    if request.url.path.startswith("/ga8/"):
-        _DEBUG_SEQUENCE += 1
-        try:
-            request_data = json.loads(body)
-        except Exception:
-            request_data = body.decode("utf-8", "replace")
-        try:
-            response_data = json.loads(response_body)
-        except Exception:
-            response_data = response_body.decode("utf-8", "replace")
-        _DEBUG_LOGS.append({"sequence": _DEBUG_SEQUENCE, "method": request.method, "path": request.url.path,
-                            "status": response.status_code, "request": request_data, "response": response_data})
-    return Response(response_body, status_code=response.status_code, headers=dict(response.headers))
-
-
-@app.get("/ga8/debug-logs")
-async def debug_logs():
-    return {"logs": list(_DEBUG_LOGS)}
-
-
-@app.post("/ga8/debug-logs/clear")
-async def clear_debug_logs():
-    _DEBUG_LOGS.clear()
-    return {"cleared": True}
-
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "tds-ga8"}
 
 _TIME = re.compile(r"^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,3}))?(Z|[+-]\d{2}:\d{2})$")
 _GENERATION = re.compile(r"^[0-9]+$")
 _URI = re.compile(r"^gs://[^/]+/.+$")
 _HEX = re.compile(r"^[0-9a-f]{8}$")
 _SAFE = 2**53 - 1
-
 
 def _time(value):
     if not isinstance(value, str):
