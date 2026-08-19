@@ -342,7 +342,7 @@ def _evaluate(data):
         for value in required.values())
     bytes_ok = _safe_int(processed) and _safe_int(maximum)
     lineage_shape = isinstance(run_id, str) and _safe_int(selected) and isinstance(digest, str) and bool(_HEX64.fullmatch(digest))
-    valid = finite_floor and required_ok and isinstance(rows, list) and bytes_ok
+    valid = finite_floor and required_ok and isinstance(rows, list) and bool(rows) and bytes_ok
     codes = []
     if not valid:
         codes.append("INVALID_INPUT")
@@ -375,7 +375,8 @@ def _evaluate(data):
     metric = None
     slice_pass = valid and lineage_ok and test_rows_ok
     if not test_rows_ok:
-        codes.append("INVALID_TEST_ROW")
+        if rows:
+            codes.append("INVALID_TEST_ROW")
     else:
         metric = round(correct / total, 12)
         if finite_floor and metric < floor:
