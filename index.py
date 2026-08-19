@@ -11,6 +11,13 @@ from fastapi.responses import JSONResponse, Response
 
 app = FastAPI()
 
+@app.middleware("http")
+async def fix_vercel_paths(request: Request, call_next):
+    path = request.scope.get("path", "")
+    if path.startswith("/index.py"):
+        request.scope["path"] = path.replace("/index.py", "") or "/"
+    return await call_next(request)
+
 @app.get("/")
 async def root():
     return {"status": "ok", "service": "tds-ga8"}
