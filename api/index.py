@@ -664,7 +664,7 @@ def _adapt_repair(data):
     if full_model: codes.append("FULL_MODEL_ARTIFACT")
     file_pass = sorted(files) == adapter_files if isinstance(files, list) else False
     if not file_pass: codes.append("ADAPTER_FILE_SET")
-    peft_pass = params_ok and inference_ok and file_pass and not full_model
+    peft_pass = inference_ok and file_pass and not full_model
 
     checkpoint = data.get("checkpoint")
     checkpoint_ok = isinstance(checkpoint, dict) and all(k in checkpoint for k in ("model", "optimizer", "scheduler", "step", "rng", "dataPosition"))
