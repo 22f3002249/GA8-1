@@ -148,7 +148,7 @@ def _sort_rows(rows):
 def _empty_result():
     return {"splits": {"train": [], "validation": [], "test": []}, "rejectedObjects": [], "rejectedRows": [], "digests": {}, "lineage": []}
 
-
+@app.post("/build-corpus")
 @app.post("/ga8/build-corpus")
 async def build_corpus(request: Request):
     try:
@@ -427,7 +427,7 @@ def _evaluate(data):
     decision = "admit" if not codes else "reject"
     return _evaluation_response(data, metric, slice_pass, decision, codes)
 
-
+@app.post("/bqml")
 @app.post("/ga8/bqml")
 async def bqml(request: Request):
     try:
@@ -543,7 +543,7 @@ def _version_gates(item, policy, as_of, policy_ok):
                 codes.append("SLICE_FLOOR:" + name)
     return _code_list(codes)
 
-
+@app.post("/promote")
 @app.post("/ga8/promote")
 async def promote(request: Request):
     global _CHAMPION_ALIAS
