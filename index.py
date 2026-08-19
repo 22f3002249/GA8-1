@@ -694,7 +694,7 @@ def _adapt_repair(data):
             "lineagePass": lineage_ok and batch_ok, "evalIsolated": eval_ok, "evaluationDeterministic": deterministic,
             "resumePass": resume_ok, "reasonCodes": _code_list(codes)}
 
-
+@app.post("/adapt")
 @app.post("/ga8/adapt")
 async def adapt(request: Request):
     try: data = await request.json()
@@ -806,7 +806,7 @@ def _quant_select(data):
     for x in results: x.pop("_position"); x.pop("_candidate")
     return {"freezeId":freeze_id,"selected":winner["name"] if winner else None,"results":results,"packageManifest":manifest}
 
-
+@app.post("/quantize")
 @app.post("/ga8/quantize")
 async def quantize(request: Request):
     try:data=await request.json()
@@ -921,7 +921,7 @@ def _pipeline_apply(state, events):
             if status=="succeeded":state["cache"][(node,keys[node])]={"artifact":artifact,"eventId":event["eventId"]}
     return _pipeline_view(state,accepted,ignored),None
 
-
+@app.post("/pipeline")
 @app.post("/ga8/pipeline")
 async def pipeline(request:Request):
     try:data=await request.json()
@@ -952,7 +952,7 @@ def _load_json_file(files,name,violations):
     try:return _json(files[name])
     except Exception:violations.append("INVALID_JSON:"+name);return None
 
-
+@app.post("/verify-bundle")
 @app.post("/ga8/verify-bundle")
 async def verify_bundle(request:Request):
     try:data=await request.json()
