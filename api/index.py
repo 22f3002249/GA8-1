@@ -14,7 +14,9 @@ app = FastAPI()
 @app.middleware("http")
 async def fix_vercel_paths(request: Request, call_next):
     path = request.scope.get("path", "")
-    if path.startswith("/index.py"):
+    if "/api/index.py" in path:
+        request.scope["path"] = path.replace("/api/index.py", "") or "/"
+    elif "/index.py" in path:
         request.scope["path"] = path.replace("/index.py", "") or "/"
     return await call_next(request)
 
